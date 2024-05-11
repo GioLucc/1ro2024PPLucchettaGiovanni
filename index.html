@@ -262,7 +262,7 @@
         const datosJson = '[{"id":1,"apellido":"Serrano","nombre":"Horacio","fechaNacimiento":19840103,"dni":45876942},{"id":2,"apellido":"Casas","nombre":"Julian","fechaNacimiento":19990723,"dni":98536214},{"id":3,"apellido":"Galeano","nombre":"Julieta","fechaNacimiento":20081103,"dni":74859612},{"id":4,"apellido":"Molina","nombre":"Juana","fechaNacimiento":19681201,"paisOrigen":"Paraguay"},{"id":5,"apellido":"Barrichello","nombre":"Rubens","fechaNacimiento":19720523,"paisOrigen":"Brazil"},{"id":666,"apellido":"Hkkinen","nombre":"Mika","fechaNacimiento":19680928,"paisOrigen":"Finlandia"}]';
         const jsonParseado = JSON.parse(datosJson);
 
-        const objetos = [];
+        let objetos = [];
 
         for (const datos of jsonParseado) {
             if (datos.paisOrigen) {
@@ -297,57 +297,22 @@
                 agregarEventoClick();
             });
         }
-        function filtrarTabla() {
-            var opcionSeleccionada = document.getElementById("filtro").value;
-            const tableBody = document.getElementById('cuerpo-de-tabla');
+        let objetosOriginal = [...objetos];
 
-            tableBody.innerHTML = '';
+        function ordenarTabla(columna) {
+            const tipoDato = typeof objetos[0][columna];
 
-            switch (opcionSeleccionada) {
-                case "Todos":
-                    objetos.forEach(obj => {
+            objetos = objetos.map(objeto => ({ ...objeto })).sort((a, b) => {
+                if (tipoDato === 'string') {
+                    return ordenAscendente ? a[columna].localeCompare(b[columna]) : b[columna].localeCompare(a[columna]);
+                } else {
+                    return ordenAscendente ? a[columna] - b[columna] : b[columna] - a[columna];
+                }
+            });
 
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                    <td>${obj.id}</td>
-                    <td>${obj.nombre}</td>
-                    <td>${obj.apellido}</td>
-                    <td>${obj.fechaNacimiento}</td>
-                    <td>${obj.dni ? obj.dni : ''}</td>
-                    <td>${obj.paisOrigen ? obj.paisOrigen : ''}</td>
+            ordenAscendente = !ordenAscendente;
 
-                `;
-                        tableBody.appendChild(row);
-                    }); break;
-                case "Extranjeros":
-                    objetos.filter(obj => obj instanceof Extranjero).forEach(extranjero => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                    <td>${extranjero.id}</td>
-                    <td>${extranjero.nombre}</td>
-                    <td>${extranjero.apellido}</td>
-                    <td>${extranjero.fechaNacimiento}</td>
-                    <td>${extranjero.dni ? extranjero.dni : ''}</td>
-                    <td>${extranjero.paisOrigen ? extranjero.paisOrigen : ''}</td>
-                `;
-                        tableBody.appendChild(row);
-                    });
-                    break
-                case "Ciudadanos":
-                    objetos.filter(obj => obj instanceof Ciudadano).forEach(ciudadano => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                    <td>${ciudadano.id}</td>
-                    <td>${ciudadano.nombre}</td>
-                    <td>${ciudadano.apellido}</td>
-                    <td>${ciudadano.fechaNacimiento}</td>
-                    <td>${ciudadano.dni ? ciudadano.dni : ''}</td>
-                    <td>${ciudadano.paisOrigen ? ciudadano.paisOrigen : ''}</td>
-                `;
-                        tableBody.appendChild(row);
-                    });
-                    break
-            }
+            cargarTabla();
         }
         function calcularEdadPorFechaNacimiento(fechaNacimiento) {
 
@@ -409,20 +374,56 @@
 
         let ordenAscendente = true;
 
-        function ordenarTabla(columna) {
-            const tipoDato = typeof objetos[0][columna];
+        function filtrarTabla() {
+            var opcionSeleccionada = document.getElementById("filtro").value;
+            const tableBody = document.getElementById('cuerpo-de-tabla');
 
-            objetos = objetos.map(objeto => ({ ...objeto })).sort((a, b) => {
-                if (tipoDato === 'string') {
-                    return ordenAscendente ? a[columna].localeCompare(b[columna]) : b[columna].localeCompare(a[columna]);
-                } else {
-                    return ordenAscendente ? a[columna] - b[columna] : b[columna] - a[columna];
-                }
-            });
+            tableBody.innerHTML = '';
 
-            ordenAscendente = !ordenAscendente;
-
-            cargarTabla();
+            switch (opcionSeleccionada) {
+                case "Todos":
+                    objetosOriginal.forEach(obj => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                    <td>${obj.id}</td>
+                    <td>${obj.nombre}</td>
+                    <td>${obj.apellido}</td>
+                    <td>${obj.fechaNacimiento}</td>
+                    <td>${obj.dni ? obj.dni : ''}</td>
+                    <td>${obj.paisOrigen ? obj.paisOrigen : ''}</td>
+                `;
+                        tableBody.appendChild(row);
+                    });
+                    break;
+                case "Extranjeros":
+                    objetosOriginal.filter(obj => obj instanceof Extranjero).forEach(extranjero => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                    <td>${extranjero.id}</td>
+                    <td>${extranjero.nombre}</td>
+                    <td>${extranjero.apellido}</td>
+                    <td>${extranjero.fechaNacimiento}</td>
+                    <td>${extranjero.dni ? extranjero.dni : ''}</td>
+                    <td>${extranjero.paisOrigen ? extranjero.paisOrigen : ''}</td>
+                `;
+                        tableBody.appendChild(row);
+                    });
+                    break;
+                case "Ciudadanos":
+                    objetosOriginal.filter(obj => obj instanceof Ciudadano).forEach(ciudadano => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                    <td>${ciudadano.id}</td>
+                    <td>${ciudadano.nombre}</td>
+                    <td>${ciudadano.apellido}</td>
+                    <td>${ciudadano.fechaNacimiento}</td>
+                    <td>${ciudadano.dni ? ciudadano.dni : ''}</td>
+                    <td>${ciudadano.paisOrigen ? ciudadano.paisOrigen : ''}</td>
+                `;
+                        tableBody.appendChild(row);
+                    });
+                    break;
+            }
         }
 
         document.addEventListener("DOMContentLoaded", function () {

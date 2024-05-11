@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #222;
+            color: #201f1f;
+            margin: 0;
+            padding: 0;
+        }
+
+        #modo-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        #icono-modo {
+            margin-right: 5px;
+        }
+
+        #texto-modo {
+            font-size: 16px;
+        }
+
+        .checkboxes {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .form-datos,
+        .form-ABM {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+            padding: 20px;
+            max-width: 700px;
+        }
+
+        .form-ABM {
+            display: none;
+        }
+
+        h1 {
+            font-size: 45px;
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .contenedor {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 9l6 6 6-6"></path></svg>');
+            background-repeat: no-repeat;
+            background-position: right 10px top 50%;
+            background-size: 15px;
+            padding-right: 30px;
+        }
+
+        .contenedor-botones {
+            text-align: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .posicion-izquierda-abajo {
+            position: relative;
+            bottom: -15px;
+            left: 0px;
+        }
+    </style>
+    <script>
+        function mostrarFormularioABM() {
+            var formABM = document.querySelector('.form-ABM');
+            formABM.style.display = 'block';
+            var formDatos = document.querySelector('.form-datos');
+            formDatos.style.display = 'none';
+        }
+        function OcultarFormularioABM() {
+            var formABM = document.querySelector('.form-ABM');
+            formABM.style.display = 'none';
+            var formDatos = document.querySelector('.form-datos');
+            formDatos.style.display = 'block';
+        }
+
+        function cambiarTexto() {
+            var tipoSeleccionado = document.getElementById("txtTipo").value;
+            if (tipoSeleccionado === "Ciudadano") {
+                document.getElementById("txtCambiableUno").innerText = "Dni:";
+            } else {
+                document.getElementById("txtCambiableUno").innerText = "Pais de Origen:";
+            }
+        }
+
+        function obtenerUltimoId(listaObjetos) {
+
+            if (listaObjetos.length === 0) {
+                return null;
+            }
+            let ultimoId = listaObjetos[0].id;
+            for (let i = 1; i < listaObjetos.length; i++) {
+                if (listaObjetos[i].id > ultimoId) {
+                    ultimoId = listaObjetos[i].id;
+                }
+            }
+            return ultimoId + 1;
+        }
+
+        function FormCompleto() {
+            let id = parseInt(document.getElementById("txtId").value);
+            let nombre = document.getElementById("txtNombre").value;
+            let apellido = document.getElementById("txtApellido").value;
+            let fechaNacimiento = document.getElementById("txtFechaNacimiento").value;
+            let tipo = document.getElementById("txtTipo").value;
+            let valorAlternado = document.getElementById("txtDespliegueUno").value;
+
+
+            let index = objetos.findIndex(element => element.id === id);
+
+            if (index !== -1) {
+                let personaEncontrada = objetos[index];
+                personaEncontrada.nombre = nombre;
+                personaEncontrada.apellido = apellido;
+                personaEncontrada.fechaNacimiento = fechaNacimiento;
+                personaEncontrada.dni = tipo === "Ciudadano" ? valorAlternado : null;
+                personaEncontrada.paisOrigen = tipo === "Extranjero" ? valorAlternado : null;
+            } else {
+
+                if (id === '' || nombre === '' || apellido === '' || fechaNacimiento === '' || tipo === '' || valorAlternado === '') {
+                    return false;
+                }
+
+                if (isNaN(id)) {
+                    id = obtenerUltimoId(objetos);
+                }
+
+                if (tipo === "Ciudadano") {
+                    persona = new Ciudadano(id, nombre, apellido, fechaNacimiento, valorAlternado);
+                } else if (tipo === "Extranjero") {
+                    persona = new Extranjero(id, nombre, apellido, fechaNacimiento, valorAlternado);
+                }
+
+                objetos.push(persona);
+            }
+
+            BorrarInputs();
+            cargarTabla();
+        }
+
+        function BorrarInputs() {
+            document.getElementById("txtId").value = "";
+            document.getElementById("txtNombre").value = "";
+            document.getElementById("txtApellido").value = "";
+            document.getElementById("txtFechaNacimiento").value = "";
+            document.getElementById("txtDespliegueUno").value = "";
+        }
+
+        class Persona {
+            constructor(id, nombre, apellido, fechaNacimiento) {
+                this.id = id;
+                this.nombre = nombre;
+                this.apellido = apellido;
+                this.fechaNacimiento = fechaNacimiento;
+            }
+
+            ToString() {
+                return `Persona: ${this.id} - ${this.nombre} ${this.apellido} - fecha De Nacimiento: ${this.fechaNacimiento}`;
+            }
+
+        }
+        class Ciudadano extends Persona {
+            constructor(id, nombre, apellido, fechaNacimiento, dni) {
+                super(id, nombre, apellido, fechaNacimiento);
+                this.dni = dni;
+
+            }
+
+            ToString() {
+                const personaToString = super.ToString();
+                return `${personaToString} - Telefono: ${this.dni}`;
+            }
+        }
+
+        class Extranjero extends Persona {
+            constructor(id, nombre, apellido, fechaNacimiento, paisOrigen) {
+                super(id, nombre, apellido, fechaNacimiento);
+                this.paisOrigen = paisOrigen;
+
+            }
+
+            ToString() {
+                const personaToString = super.ToString();
+                return `${personaToString} - Sueldo: ${this.sueldo} - Ventas: ${this.ventas}`;
+            }
+        }
+
+        const datosJson = '[{"id":1,"apellido":"Serrano","nombre":"Horacio","fechaNacimiento":19840103,"dni":45876942},{"id":2,"apellido":"Casas","nombre":"Julian","fechaNacimiento":19990723,"dni":98536214},{"id":3,"apellido":"Galeano","nombre":"Julieta","fechaNacimiento":20081103,"dni":74859612},{"id":4,"apellido":"Molina","nombre":"Juana","fechaNacimiento":19681201,"paisOrigen":"Paraguay"},{"id":5,"apellido":"Barrichello","nombre":"Rubens","fechaNacimiento":19720523,"paisOrigen":"Brazil"},{"id":666,"apellido":"Hkkinen","nombre":"Mika","fechaNacimiento":19680928,"paisOrigen":"Finlandia"}]';
+        const jsonParseado = JSON.parse(datosJson);
+
+        let objetos = [];
+
+        for (const datos of jsonParseado) {
+            if (datos.paisOrigen) {
+                objetos.push(new Extranjero(datos.id, datos.nombre, datos.apellido, datos.fechaNacimiento, datos.paisOrigen));
+            }
+            else if (datos.dni) {
+                objetos.push(new Ciudadano(datos.id, datos.nombre, datos.apellido, datos.fechaNacimiento, datos.dni));
+            }
+            else {
+                objetos.push(new Persona(datos.id, datos.nombre, datos.apellido, datos.fechaNacimiento));
+            }
+
+            console.log(objetos);
+        }
+        function cargarTabla() {
+
+            const tableBody = document.getElementById('cuerpo-de-tabla');
+
+            tableBody.innerHTML = '';
+
+            objetos.forEach(obj => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+            <td>${obj.id}</td>
+            <td>${obj.nombre}</td>
+            <td>${obj.apellido}</td>
+            <td>${obj.fechaNacimiento}</td>
+            <td>${obj.dni ? obj.dni : ''}</td>
+            <td>${obj.paisOrigen ? obj.paisOrigen : ''}</td>
+        `;
+                tableBody.appendChild(row);
+                agregarEventoClick();
+            });
+        }
+        function filtrarTabla() {
+            var opcionSeleccionada = document.getElementById("filtro").value;
+            const tableBody = document.getElementById('cuerpo-de-tabla');
+
+            tableBody.innerHTML = '';
+
+            switch (opcionSeleccionada) {
+                case "Todos":
+                    objetos.forEach(obj => {
+
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                    <td>${obj.id}</td>
+                    <td>${obj.nombre}</td>
+                    <td>${obj.apellido}</td>
+                    <td>${obj.fechaNacimiento}</td>
+                    <td>${obj.dni ? obj.dni : ''}</td>
+                    <td>${obj.paisOrigen ? obj.paisOrigen : ''}</td>
+
+                `;
+                        tableBody.appendChild(row);
+                    }); break;
+                case "Extranjeros":
+                    objetos.filter(obj => obj instanceof Extranjero).forEach(extranjero => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                    <td>${extranjero.id}</td>
+                    <td>${extranjero.nombre}</td>
+                    <td>${extranjero.apellido}</td>
+                    <td>${extranjero.fechaNacimiento}</td>
+                    <td>${extranjero.dni ? extranjero.dni : ''}</td>
+                    <td>${extranjero.paisOrigen ? extranjero.paisOrigen : ''}</td>
+                `;
+                        tableBody.appendChild(row);
+                    });
+                    break
+                case "Ciudadanos":
+                    objetos.filter(obj => obj instanceof Ciudadano).forEach(ciudadano => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                    <td>${ciudadano.id}</td>
+                    <td>${ciudadano.nombre}</td>
+                    <td>${ciudadano.apellido}</td>
+                    <td>${ciudadano.fechaNacimiento}</td>
+                    <td>${ciudadano.dni ? ciudadano.dni : ''}</td>
+                    <td>${ciudadano.paisOrigen ? ciudadano.paisOrigen : ''}</td>
+                `;
+                        tableBody.appendChild(row);
+                    });
+                    break
+            }
+        }
+        function calcularEdadPorFechaNacimiento(fechaNacimiento) {
+
+            var añoNacimiento = parseInt(fechaNacimiento.toString().substring(0, 4));
+
+            var añoActual = new Date().getFullYear();
+            var edad = añoActual - añoNacimiento;
+
+            return edad;
+        }
+
+        function DarDeBaja() {
+            const id = parseInt(document.getElementById("txtId").value);
+
+            const index = objetos.findIndex(obj => obj.id === id);
+
+            if (index !== -1) {
+                objetos.splice(index, 1);
+                console.log("Objeto eliminado con éxito.");
+            } else {
+                console.log("No se encontró ningún objeto con el ID especificado.");
+            }
+
+            cargarTabla()
+        }
+
+        function CalcularEdades() {
+            const opcionSeleccionada = document.getElementById("filtro").value;
+
+            let personasFiltradas = [];
+
+            switch (opcionSeleccionada) {
+                case "Extranjeros":
+                    personasFiltradas = objetos.filter(obj => obj instanceof Extranjero);
+                    break;
+                case "Ciudadanos":
+                    personasFiltradas = objetos.filter(obj => obj instanceof Ciudadano);
+                    break;
+                default:
+                    personasFiltradas = objetos;
+                    break;
+            }
+
+            const edades = personasFiltradas
+                .map(persona => {
+                    if (persona.fechaNacimiento) {
+                        return calcularEdadPorFechaNacimiento(persona.fechaNacimiento);
+                    } else {
+                        return 0;
+                    }
+                });
+
+            const totalEdades = edades.reduce((total, edad) => total + edad, 0);
+            const cantidadPersonas = edades.length;
+            const promedio = cantidadPersonas > 0 ? totalEdades / cantidadPersonas : 0;
+
+            document.getElementById("txtPromedio").value = promedio;
+        }
+
+        let ordenAscendente = true;
+
+        function ordenarTabla(columna) {
+            const tipoDato = typeof objetos[0][columna];
+
+            objetos = objetos.map(objeto => ({ ...objeto })).sort((a, b) => {
+                if (tipoDato === 'string') {
+                    return ordenAscendente ? a[columna].localeCompare(b[columna]) : b[columna].localeCompare(a[columna]);
+                } else {
+                    return ordenAscendente ? a[columna] - b[columna] : b[columna] - a[columna];
+                }
+            });
+
+            ordenAscendente = !ordenAscendente;
+
+            cargarTabla();
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            cargarTabla();
+            const checkboxes = document.querySelectorAll('.chkColumna');
+
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    const columna = this.dataset.columna;
+                    const index = Array.from(this.parentNode.parentNode.querySelectorAll('label')).indexOf(this.parentNode);
+
+                    const rows = document.querySelectorAll('tr');
+
+                    rows.forEach(row => {
+                        const cells = row.querySelectorAll('th, td');
+                        cells[index].style.display = this.checked ? '' : 'none';
+                    });
+                });
+            });
+
+            const headers = document.querySelectorAll('th');
+
+            headers.forEach(header => {
+                header.addEventListener('click', function () {
+                    const columna = this.innerText.toLowerCase();
+                    ordenarTabla(columna);
+                });
+            });
+        });
+
+        function agregarEventoClick() {
+            const filas = document.querySelectorAll("#cuerpo-de-tabla tr");
+
+            filas.forEach((fila, indice) => {
+                fila.addEventListener("dblclick", function () {
+                    mostrarFormularioABM();
+                    const celdas = fila.querySelectorAll('td');
+
+                    if (celdas[4].innerText === "") {
+                        document.getElementById("txtId").value = celdas[0].innerText;
+                        document.getElementById("txtNombre").value = celdas[1].innerText;
+                        document.getElementById("txtApellido").value = celdas[2].innerText;
+                        document.getElementById("txtFechaNacimiento").value = celdas[3].innerText;
+                        document.getElementById("txtTipo").value = "Extranjero";
+                        document.getElementById("txtDespliegueUno").value = celdas[6].innerText;
+
+                    } else {
+                        document.getElementById("txtId").value = celdas[0].innerText;
+                        document.getElementById("txtNombre").value = celdas[1].innerText;
+                        document.getElementById("txtApellido").value = celdas[2].innerText;
+                        document.getElementById("txtFechaNacimiento").value = celdas[3].innerText;
+                        document.getElementById("txtTipo").value = "Ciudadano";
+                        document.getElementById("txtDespliegueUno").value = celdas[4].innerText;
+                    }
+                    cambiarTexto();
+                });
+            });
+        }
+
+    </script>
+
+    <title>Document</title>
+</head>
+
+<body>
+    </button>
+    <form class="form-datos">
+        <div class="texto-form">
+            <div class="contenedor">
+                <h1>Form Datos</h1>
+            </div>
+            <div class="contenedor">
+                <p>Filtrar Por: </p>
+                <select id="filtro" name="filtro" onchange="filtrarTabla()">
+                    <option>Todos</option>
+                    <option>Ciudadanos</option>
+                    <option>Extranjeros</option>
+                </select>
+            </div>
+            <div class="contenedor">
+                <p>Calcular Edad Promedio:</p>
+                <input type="number" name="txtPromedio" size="35" value="" id="txtPromedio" readonly />
+                <button id="botonCalcular" type="button" onclick="CalcularEdades()">Calcular</button>
+            </div>
+            <div class="checkboxes">
+                <p>Mostrar Columnas:</p>
+                <label>
+                    <input type="checkbox" name="opcion" class="chkColumna" checked>
+                    ID
+                </label>
+                <label>
+                    <input type="checkbox" name="opcion" class="chkColumna" checked>
+                    Nombre
+                </label>
+                <label>
+                    <input type="checkbox" name="opcion" class="chkColumna" checked>
+                    Apellido
+                </label>
+                <label>
+                    <input type="checkbox" name="opcion" class="chkColumna" checked>
+                    Fecha de Nacimiento
+                </label>
+                <label>
+                    <input type="checkbox" name="opcion" class="chkColumna" checked>
+                    Dni
+                </label>
+                <label>
+                    <input type="checkbox" name="opcion" class="chkColumna" checked>
+                    Pais Origen
+                </label>
+            </div>
+        </div>
+        <div class="Tabla">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>Fecha De Nacimiento</th>
+                        <th>Dni</th>
+                        <th>Pais Origen</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpo-de-tabla">
+                </tbody>
+            </table>
+            <button id="botonAgregar" class="posicion-izquierda-abajo" type="button"
+                onclick="mostrarFormularioABM()">Agregar</button>
+        </div>
+    </form>
+
+    <div class="espacio"></div>
+
+    <form class="form-ABM">
+        <h1>Formulario ABM</h1>
+        <div class="contenedor">
+            <p>Id:</p>
+            <input type="number" name="txtId" size="35" value="" id="txtId" readonly>
+        </div>
+
+        <div class="contenedor">
+            <p>Nombre:</p>
+            <input type="text" name="txtNombre" size="35" value="" id="txtNombre" />
+        </div>
+
+        <div class="contenedor">
+            <p>Apellido:</p>
+            <input type="text" name="txtApellido" size="35" value="" id="txtApellido" />
+        </div>
+
+        <div class="contenedor">
+            <p>Tipo:</p>
+            <select id="txtTipo" name="txtTipo" onchange="cambiarTexto()">
+                <option>Ciudadano</option>
+                <option>Extranjero</option>
+            </select>
+        </div>
+
+        <div class="contenedor">
+            <p>Fecha de Nacimiento:</p>
+            <input type="number" name="txtFechaNacimiento" size="35" value="" id="txtFechaNacimiento" />
+        </div>
+
+        <div class="contenedor">
+            <p id="txtCambiableUno">Dni:</p>
+            <input type="text" name="txtDespliegueUno" size="35" value="" id="txtDespliegueUno" />
+        </div>
+        <div class="contenedor-botones">
+            <button id="botonAceptar" type="button" onclick="FormCompleto(), OcultarFormularioABM()">Aceptar</button>
+            <button id="botonEliminar" type="button" onclick="DarDeBaja(), OcultarFormularioABM()">Dar de Baja</button>
+            <button id="botonCancelar" type="button" onclick="BorrarInputs(), OcultarFormularioABM()">Cancelar</button>
+        </div>
+    </form>
+
+
+</body>
+
+</html>
